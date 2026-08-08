@@ -10,7 +10,7 @@ import Divider from "@modules/common/components/divider"
 import MedusaRadio from "@modules/common/components/radio"
 import { Button, clx, Heading, Text } from "@modules/common/components/ui"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 const PICKUP_OPTION_ON = "__PICKUP_ON"
 const PICKUP_OPTION_OFF = "__PICKUP_OFF"
@@ -60,7 +60,7 @@ const Shipping: React.FC<ShippingProps> = ({
   >({})
   const [error, setError] = useState<string | null>(null)
   const [shippingMethodId, setShippingMethodId] = useState<string | null>(
-    cart.shipping_methods?.at(-1)?.shipping_option_id || null
+    cart.shipping_methods?.at(-1)?.shipping_option_id || null,
   )
 
   const searchParams = useSearchParams()
@@ -69,12 +69,40 @@ const Shipping: React.FC<ShippingProps> = ({
 
   const isOpen = searchParams.get("step") === "delivery"
 
-  const _shippingMethods = availableShippingMethods?.filter(
-    (sm) => (sm as unknown as { service_zone?: { fulfillment_set?: { type?: string; location?: { address: HttpTypes.StoreCartAddress } } } }).service_zone?.fulfillment_set?.type !== "pickup"
+  const _shippingMethods = useMemo(
+    () =>
+      availableShippingMethods?.filter(
+        (sm) =>
+          (
+            sm as unknown as {
+              service_zone?: {
+                fulfillment_set?: {
+                  type?: string
+                  location?: { address: HttpTypes.StoreCartAddress }
+                }
+              }
+            }
+          ).service_zone?.fulfillment_set?.type !== "pickup",
+      ),
+    [availableShippingMethods],
   )
 
-  const _pickupMethods = availableShippingMethods?.filter(
-    (sm) => (sm as unknown as { service_zone?: { fulfillment_set?: { type?: string; location?: { address: HttpTypes.StoreCartAddress } } } }).service_zone?.fulfillment_set?.type === "pickup"
+  const _pickupMethods = useMemo(
+    () =>
+      availableShippingMethods?.filter(
+        (sm) =>
+          (
+            sm as unknown as {
+              service_zone?: {
+                fulfillment_set?: {
+                  type?: string
+                  location?: { address: HttpTypes.StoreCartAddress }
+                }
+              }
+            }
+          ).service_zone?.fulfillment_set?.type === "pickup",
+      ),
+    [availableShippingMethods],
   )
 
   const hasPickupOptions = !!_pickupMethods?.length
@@ -107,7 +135,7 @@ const Shipping: React.FC<ShippingProps> = ({
     if (_pickupMethods?.find((m) => m.id === shippingMethodId)) {
       setShowPickupOptions(PICKUP_OPTION_ON)
     }
-  }, [availableShippingMethods])
+  }, [cart.id, _pickupMethods, _shippingMethods, shippingMethodId])
 
   const handleEdit = () => {
     router.push(pathname + "?step=delivery", { scroll: false })
@@ -119,7 +147,7 @@ const Shipping: React.FC<ShippingProps> = ({
 
   const handleSetShippingMethod = async (
     id: string,
-    variant: "shipping" | "pickup"
+    variant: "shipping" | "pickup",
   ) => {
     setError(null)
 
@@ -161,7 +189,7 @@ const Shipping: React.FC<ShippingProps> = ({
             {
               "opacity-50 pointer-events-none select-none":
                 !isOpen && cart.shipping_methods?.length === 0,
-            }
+            },
           )}
         >
           Delivery
@@ -202,7 +230,7 @@ const Shipping: React.FC<ShippingProps> = ({
                     value={showPickupOptions}
                     onChange={(_value) => {
                       const id = _pickupMethods.find(
-                        (option) => !option.insufficient_inventory
+                        (option) => !option.insufficient_inventory,
                       )?.id
 
                       if (id) {
@@ -218,7 +246,7 @@ const Shipping: React.FC<ShippingProps> = ({
                         {
                           "border-ui-border-interactive":
                             showPickupOptions === PICKUP_OPTION_ON,
-                        }
+                        },
                       )}
                     >
                       <div className="flex items-center gap-x-4">
@@ -262,7 +290,7 @@ const Shipping: React.FC<ShippingProps> = ({
                               option.id === shippingMethodId,
                             "hover:shadow-brders-none cursor-not-allowed":
                               isDisabled,
-                          }
+                          },
                         )}
                       >
                         <div className="flex items-center gap-x-4">
@@ -332,7 +360,7 @@ const Shipping: React.FC<ShippingProps> = ({
                                 option.id === shippingMethodId,
                               "hover:shadow-brders-none cursor-not-allowed":
                                 option.insufficient_inventory,
-                            }
+                            },
                           )}
                         >
                           <div className="flex items-start gap-x-4">
@@ -345,8 +373,18 @@ const Shipping: React.FC<ShippingProps> = ({
                               </span>
                               <span className="text-base-regular text-ui-fg-muted">
                                 {formatAddress(
-                                  (option as unknown as { service_zone?: { fulfillment_set?: { location?: { address: HttpTypes.StoreCartAddress } } } }).service_zone?.fulfillment_set?.location
-                                    ?.address as HttpTypes.StoreCartAddress
+                                  (
+                                    option as unknown as {
+                                      service_zone?: {
+                                        fulfillment_set?: {
+                                          location?: {
+                                            address: HttpTypes.StoreCartAddress
+                                          }
+                                        }
+                                      }
+                                    }
+                                  ).service_zone?.fulfillment_set?.location
+                                    ?.address as HttpTypes.StoreCartAddress,
                                 )}
                               </span>
                             </div>

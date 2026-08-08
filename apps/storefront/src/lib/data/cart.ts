@@ -16,6 +16,23 @@ import {
 import { getRegion } from "./regions"
 import { getLocale } from "./locale-actions"
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message
+  }
+
+  return "An unexpected error occurred"
+}
+
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
  * @param cartId - optional - The ID of the cart to retrieve.
@@ -70,7 +87,7 @@ export async function getOrSetCart(countryCode: string) {
     const cartResp = await sdk.store.cart.create(
       { region_id: region.id, locale: locale || undefined },
       {},
-      headers
+      headers,
     )
     cart = cartResp.cart
 
@@ -145,7 +162,7 @@ export async function addToCart({
         quantity,
       },
       {},
-      headers
+      headers,
     )
     .then(async () => {
       const cartCacheTag = await getCacheTag("carts")
@@ -239,7 +256,7 @@ export async function setShippingMethod({
 
 export async function initiatePaymentSession(
   cart: HttpTypes.StoreCart,
-  data: HttpTypes.StoreInitializePaymentSession
+  data: HttpTypes.StoreInitializePaymentSession,
 ) {
   const headers = {
     ...(await getAuthHeaders()),
@@ -278,7 +295,7 @@ export async function applyPromotions(codes: string[]) {
     .catch(medusaError)
 }
 
-export async function applyGiftCard(code: string) {
+export async function applyGiftCard(_code: string) {
   //   const cartId = getCartId()
   //   if (!cartId) return "No cartId cookie found"
   //   try {
@@ -290,7 +307,7 @@ export async function applyGiftCard(code: string) {
   //   }
 }
 
-export async function removeDiscount(code: string) {
+export async function removeDiscount(_code: string) {
   // const cartId = getCartId()
   // if (!cartId) return "No cartId cookie found"
   // try {
@@ -302,8 +319,8 @@ export async function removeDiscount(code: string) {
 }
 
 export async function removeGiftCard(
-  codeToRemove: string,
-  giftCards: any[]
+  _codeToRemove: string,
+  _giftCards: unknown[],
   // giftCards: GiftCard[]
 ) {
   //   const cartId = getCartId()
@@ -323,13 +340,13 @@ export async function removeGiftCard(
 
 export async function submitPromotionForm(
   currentState: unknown,
-  formData: FormData
+  formData: FormData,
 ) {
   const code = formData.get("code") as string
   try {
     await applyPromotions([code])
-  } catch (e: any) {
-    return e.message
+  } catch (error: unknown) {
+    return getErrorMessage(error)
   }
 }
 
@@ -344,45 +361,50 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
-    const data = {
+    const getFormValue = (key: string) => {
+      const value = formData.get(key)
+      return typeof value === "string" ? value : ""
+    }
+
+    const data: HttpTypes.StoreUpdateCart = {
       shipping_address: {
-        first_name: formData.get("shipping_address.first_name"),
-        last_name: formData.get("shipping_address.last_name"),
-        address_1: formData.get("shipping_address.address_1"),
+        first_name: getFormValue("shipping_address.first_name"),
+        last_name: getFormValue("shipping_address.last_name"),
+        address_1: getFormValue("shipping_address.address_1"),
         address_2: "",
-        company: formData.get("shipping_address.company"),
-        postal_code: formData.get("shipping_address.postal_code"),
-        city: formData.get("shipping_address.city"),
-        country_code: formData.get("shipping_address.country_code"),
-        province: formData.get("shipping_address.province"),
-        phone: formData.get("shipping_address.phone"),
+        company: getFormValue("shipping_address.company"),
+        postal_code: getFormValue("shipping_address.postal_code"),
+        city: getFormValue("shipping_address.city"),
+        country_code: getFormValue("shipping_address.country_code"),
+        province: getFormValue("shipping_address.province"),
+        phone: getFormValue("shipping_address.phone"),
       },
-      email: formData.get("email"),
-    } as any
+      email: getFormValue("email"),
+    }
 
     const sameAsBilling = formData.get("same_as_billing")
     if (sameAsBilling === "on") data.billing_address = data.shipping_address
 
     if (sameAsBilling !== "on")
       data.billing_address = {
-        first_name: formData.get("billing_address.first_name"),
-        last_name: formData.get("billing_address.last_name"),
-        address_1: formData.get("billing_address.address_1"),
+        first_name: getFormValue("billing_address.first_name"),
+        last_name: getFormValue("billing_address.last_name"),
+        address_1: getFormValue("billing_address.address_1"),
         address_2: "",
-        company: formData.get("billing_address.company"),
-        postal_code: formData.get("billing_address.postal_code"),
-        city: formData.get("billing_address.city"),
-        country_code: formData.get("billing_address.country_code"),
-        province: formData.get("billing_address.province"),
-        phone: formData.get("billing_address.phone"),
+        company: getFormValue("billing_address.company"),
+        postal_code: getFormValue("billing_address.postal_code"),
+        city: getFormValue("billing_address.city"),
+        country_code: getFormValue("billing_address.country_code"),
+        province: getFormValue("billing_address.province"),
+        phone: getFormValue("billing_address.phone"),
       }
     await updateCart(data)
-  } catch (e: any) {
-    return e.message
+  } catch (error: unknown) {
+    return getErrorMessage(error)
   }
 
   redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
+    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`,
   )
 }
 

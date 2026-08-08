@@ -20,7 +20,7 @@ type ProductActionsProps = {
 }
 
 const optionsAsKeymap = (
-  variantOptions: HttpTypes.StoreProductVariant["options"]
+  variantOptions: HttpTypes.StoreProductVariant["options"],
 ) => {
   return variantOptions?.reduce((acc: Record<string, string>, varopt) => {
     if (varopt.option_id) acc[varopt.option_id] = varopt.value
@@ -90,7 +90,7 @@ export default function ProductActions({
     }
 
     router.replace(pathname + "?" + params.toString())
-  }, [selectedVariant, isValidVariant])
+  }, [isValidVariant, pathname, router, searchParams, selectedVariant])
 
   // check if the selected variant is in stock
   const inStock = useMemo(() => {
@@ -179,8 +179,8 @@ export default function ProductActions({
           {!selectedVariant && !options
             ? "Select variant"
             : !inStock || !isValidVariant
-            ? "Out of stock"
-            : "Add to cart"}
+              ? "Out of stock"
+              : "Add to cart"}
         </Button>
         <MobileActions
           product={product}

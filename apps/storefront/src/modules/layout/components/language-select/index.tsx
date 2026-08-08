@@ -7,9 +7,18 @@ import {
   ListboxOptions,
   Transition,
 } from "@headlessui/react"
-import { Fragment, useEffect, useMemo, useState, useTransition } from "react"
+import {
+  Fragment,
+  type ComponentType,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react"
 import { useRouter } from "next/navigation"
-import ReactCountryFlag from "react-country-flag"
+import ReactCountryFlag, {
+  type ReactCountryFlagProps,
+} from "react-country-flag"
 
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { updateLocale } from "@lib/data/locale-actions"
@@ -21,6 +30,9 @@ type LanguageOption = {
   localizedName: string
   countryCode: string
 }
+
+const CountryFlag =
+  ReactCountryFlag as unknown as ComponentType<ReactCountryFlagProps>
 
 const getCountryCodeFromLocale = (localeCode: string): string => {
   try {
@@ -49,7 +61,7 @@ type LanguageSelectProps = {
 const getLocalizedLanguageName = (
   code: string,
   fallbackName: string,
-  displayLocale: string = "en-US"
+  displayLocale: string = "en-US",
 ): string => {
   try {
     const displayNames = new Intl.DisplayNames([displayLocale], {
@@ -86,7 +98,7 @@ const LanguageSelect = ({
       localizedName: getLocalizedLanguageName(
         locale.code,
         locale.name,
-        currentLocale ?? "en-US"
+        currentLocale ?? "en-US",
       ),
       countryCode: getCountryCodeFromLocale(locale.code),
     }))
@@ -96,7 +108,7 @@ const LanguageSelect = ({
   useEffect(() => {
     if (currentLocale) {
       const option = options.find(
-        (o) => o.code.toLowerCase() === currentLocale.toLowerCase()
+        (o) => o.code.toLowerCase() === currentLocale.toLowerCase(),
       )
       setCurrent(option ?? DEFAULT_OPTION)
     } else {
@@ -119,9 +131,9 @@ const LanguageSelect = ({
         onChange={handleChange}
         defaultValue={
           currentLocale
-            ? options.find(
-                (o) => o.code.toLowerCase() === currentLocale.toLowerCase()
-              ) ?? DEFAULT_OPTION
+            ? (options.find(
+                (o) => o.code.toLowerCase() === currentLocale.toLowerCase(),
+              ) ?? DEFAULT_OPTION)
             : DEFAULT_OPTION
         }
         disabled={isPending}
@@ -132,8 +144,7 @@ const LanguageSelect = ({
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
                 {current.countryCode && (
-                  /* @ts-ignore */
-                  <ReactCountryFlag
+                  <CountryFlag
                     svg
                     style={{
                       width: "16px",
@@ -166,8 +177,7 @@ const LanguageSelect = ({
                   className="py-2 hover:bg-gray-200 px-3 cursor-pointer flex items-center gap-x-2"
                 >
                   {o.countryCode ? (
-                    /* @ts-ignore */
-                    <ReactCountryFlag
+                    <CountryFlag
                       svg
                       style={{
                         width: "16px",

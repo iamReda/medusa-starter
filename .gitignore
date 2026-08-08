@@ -26,6 +26,7 @@ coverage
 
 # Misc
 *.pem
+.local/
 
 # Debug
 npm-debug.log*
