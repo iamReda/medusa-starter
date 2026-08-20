@@ -1,22 +1,19 @@
-"use client"
-
 import { XMark } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Help from "@modules/order/components/help"
 import Items from "@modules/order/components/items"
 import OrderDetails from "@modules/order/components/order-details"
+import OrderReviewSection from "@modules/order/components/order-review-section"
 import OrderSummary from "@modules/order/components/order-summary"
 import ShippingDetails from "@modules/order/components/shipping-details"
-import React from "react"
+import { Suspense } from "react"
 
 type OrderDetailsTemplateProps = {
   order: HttpTypes.StoreOrder
 }
 
-const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
-  order,
-}) => {
+const OrderDetailsTemplate = ({ order }: OrderDetailsTemplateProps) => {
   return (
     <div className="flex flex-col justify-center gap-y-4">
       <div className="flex gap-2 justify-between items-center">
@@ -35,6 +32,9 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
       >
         <OrderDetails order={order} showStatus />
         <Items order={order} />
+        <Suspense fallback={null}>
+          <OrderReviewSection order={order} />
+        </Suspense>
         <ShippingDetails order={order} />
         <OrderSummary order={order} />
         <Help />

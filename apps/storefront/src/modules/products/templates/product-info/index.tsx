@@ -1,6 +1,8 @@
+import { Suspense } from "react"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@modules/common/components/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import ProductRatingSummary from "@modules/products/components/product-reviews/product-rating-summary"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
@@ -25,6 +27,12 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         >
           {product.title}
         </Heading>
+
+        {product.id && (
+          <Suspense fallback={null}>
+            <ProductRatingSummary productId={product.id} />
+          </Suspense>
+        )}
 
         <Text
           className="text-medium text-ui-fg-subtle whitespace-pre-line"

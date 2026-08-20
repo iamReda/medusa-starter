@@ -19,6 +19,9 @@
     "overrides": {
       "@types/react": "19.0.5",
       "@types/react-dom": "19.0.5"
+    },
+    "patchedDependencies": {
+      "@lambdacurry/medusa-product-reviews@1.4.0": "patches/@lambdacurry__medusa-product-reviews@1.4.0.patch"
     }
   },
   "devDependencies": {

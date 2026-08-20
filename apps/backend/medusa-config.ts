@@ -12,5 +12,13 @@ module.exports = defineConfig({
       jwtSecret: process.env.JWT_SECRET,
       cookieSecret: process.env.COOKIE_SECRET,
     }
-  }
+  },
+  plugins: [
+    {
+      resolve: "@lambdacurry/medusa-product-reviews",
+      options: {
+        defaultReviewStatus: "pending",
+      },
+    },
+  ],
 })

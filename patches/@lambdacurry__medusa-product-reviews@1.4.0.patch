@@ -1,0 +1,133 @@
+diff --git a/.medusa/server/src/api/admin/product-review-stats/middlewares.js b/.medusa/server/src/api/admin/product-review-stats/middlewares.js
+index 179cc613444e39b2a783fe6016f473c5c8d2f174..985c8270a455d5cad45338dc8b14d406e71d7d9e 100644
+--- a/.medusa/server/src/api/admin/product-review-stats/middlewares.js
++++ b/.medusa/server/src/api/admin/product-review-stats/middlewares.js
+@@ -3,17 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.adminProductReviewStatRoutesMiddlewares = exports.defaultProductReviewStatsQueryConfig = exports.defaultAdminProductReviewStatFields = exports.listAdminProductReviewStatsQuerySchema = void 0;
+ const framework_1 = require("@medusajs/framework");
+ const validators_1 = require("@medusajs/medusa/api/utils/validators");
+-const zod_1 = require("zod");
++const zod_1 = require("@medusajs/framework/zod");
+ exports.listAdminProductReviewStatsQuerySchema = (0, validators_1.createFindParams)({
+     offset: 0,
+     limit: 50,
+-}).merge(zod_1.z.object({
++}).extend({
+     id: zod_1.z.union([zod_1.z.string(), zod_1.z.array(zod_1.z.string())]).optional(),
+     product_id: zod_1.z.union([zod_1.z.string(), zod_1.z.array(zod_1.z.string())]).optional(),
+     average_rating: zod_1.z.union([zod_1.z.number().max(5).min(1), zod_1.z.array(zod_1.z.number().max(5).min(1))]).optional(),
+     created_at: (0, validators_1.createOperatorMap)().optional(),
+     updated_at: (0, validators_1.createOperatorMap)().optional(),
+-}));
++});
+ exports.defaultAdminProductReviewStatFields = [
+     'id',
+     'product_id',
+diff --git a/.medusa/server/src/api/admin/product-reviews/[id]/response/middlewares.js b/.medusa/server/src/api/admin/product-reviews/[id]/response/middlewares.js
+index 3b37015f3317f9113953ab49d66a3f99e083c2cb..04ed8ae2c57c4db6a6b65c01ea7dd17eb08ee5c0 100644
+--- a/.medusa/server/src/api/admin/product-reviews/[id]/response/middlewares.js
++++ b/.medusa/server/src/api/admin/product-reviews/[id]/response/middlewares.js
+@@ -1,7 +1,7 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.adminProductReviewResponseRouteMiddlewares = exports.createProductReviewResponseDTO = void 0;
+-const zod_1 = require("zod");
++const zod_1 = require("@medusajs/framework/zod");
+ const framework_1 = require("@medusajs/framework");
+ exports.createProductReviewResponseDTO = zod_1.z.object({
+     content: zod_1.z.string().min(1),
+diff --git a/.medusa/server/src/api/admin/product-reviews/[id]/status/middlewares.js b/.medusa/server/src/api/admin/product-reviews/[id]/status/middlewares.js
+index f5855d9e3acdb42ba73207dc17a27e53899f2891..b2907b7d2a6787171fd10cc26ff5fc5bfdc0b9f2 100644
+--- a/.medusa/server/src/api/admin/product-reviews/[id]/status/middlewares.js
++++ b/.medusa/server/src/api/admin/product-reviews/[id]/status/middlewares.js
+@@ -2,7 +2,7 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.adminProductReviewStatusRoutesMiddlewares = exports.updateProductReviewStatusSchema = void 0;
+ const framework_1 = require("@medusajs/framework");
+-const zod_1 = require("zod");
++const zod_1 = require("@medusajs/framework/zod");
+ exports.updateProductReviewStatusSchema = zod_1.z.object({
+     status: zod_1.z.enum(['pending', 'approved', 'flagged']),
+ });
+diff --git a/.medusa/server/src/api/admin/product-reviews/middlewares.js b/.medusa/server/src/api/admin/product-reviews/middlewares.js
+index b0232eee2aa3a500529942ac9444e9cffb848b0a..f16ef0b380170a27d8b2fa5dbdfdebddbb6c9b46 100644
+--- a/.medusa/server/src/api/admin/product-reviews/middlewares.js
++++ b/.medusa/server/src/api/admin/product-reviews/middlewares.js
+@@ -3,12 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.adminProductReviewRoutesMiddlewares = exports.defaultProductReviewsQueryConfig = exports.defaultAdminProductReviewFields = exports.listAdminProductReviewsQuerySchema = void 0;
+ const framework_1 = require("@medusajs/framework");
+ const validators_1 = require("@medusajs/medusa/api/utils/validators");
+-const zod_1 = require("zod");
+-const statuses = zod_1.z.enum(['pending', 'approved', 'rejected']);
++const zod_1 = require("@medusajs/framework/zod");
++const statuses = zod_1.z.enum(['pending', 'approved', 'flagged']);
+ exports.listAdminProductReviewsQuerySchema = (0, validators_1.createFindParams)({
+     offset: 0,
+     limit: 50,
+-}).merge(zod_1.z.object({
++}).extend({
+     q: zod_1.z.string().optional(),
+     id: zod_1.z.union([zod_1.z.string(), zod_1.z.array(zod_1.z.string())]).optional(),
+     status: zod_1.z.union([statuses, zod_1.z.array(statuses)]).optional(),
+@@ -17,7 +17,7 @@ exports.listAdminProductReviewsQuerySchema = (0, validators_1.createFindParams)(
+     rating: zod_1.z.union([zod_1.z.number().max(5).min(1), zod_1.z.array(zod_1.z.number().max(5).min(1))]).optional(),
+     created_at: (0, validators_1.createOperatorMap)().optional(),
+     updated_at: (0, validators_1.createOperatorMap)().optional(),
+-}));
++});
+ exports.defaultAdminProductReviewFields = [
+     'id',
+     'status',
+diff --git a/.medusa/server/src/api/store/product-review-stats/middlewares.js b/.medusa/server/src/api/store/product-review-stats/middlewares.js
+index d1447f63994316a9fee38f4dd7bbe23cadb3364a..f8ff8816a6a6ad1a5bf04ee2e1e58e72e1740697 100644
+--- a/.medusa/server/src/api/store/product-review-stats/middlewares.js
++++ b/.medusa/server/src/api/store/product-review-stats/middlewares.js
+@@ -3,17 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.storeProductReviewStatRoutesMiddlewares = exports.defaultStoreProductReviewStatsQueryConfig = exports.defaultStoreProductReviewStatFields = exports.listStoreProductReviewStatsQuerySchema = void 0;
+ const framework_1 = require("@medusajs/framework");
+ const validators_1 = require("@medusajs/medusa/api/utils/validators");
+-const zod_1 = require("zod");
++const zod_1 = require("@medusajs/framework/zod");
+ exports.listStoreProductReviewStatsQuerySchema = (0, validators_1.createFindParams)({
+     offset: 0,
+     limit: 50,
+-}).merge(zod_1.z.object({
++}).extend({
+     id: zod_1.z.union([zod_1.z.string(), zod_1.z.array(zod_1.z.string())]).optional(),
+     product_id: zod_1.z.union([zod_1.z.string(), zod_1.z.array(zod_1.z.string())]).optional(),
+     average_rating: zod_1.z.union([zod_1.z.number().max(5).min(1), zod_1.z.array(zod_1.z.number().max(5).min(1))]).optional(),
+     created_at: (0, validators_1.createOperatorMap)().optional(),
+     updated_at: (0, validators_1.createOperatorMap)().optional(),
+-}));
++});
+ exports.defaultStoreProductReviewStatFields = [
+     'id',
+     'product_id',
+diff --git a/.medusa/server/src/api/store/product-reviews/middlewares.js b/.medusa/server/src/api/store/product-reviews/middlewares.js
+index 62bc7fe986180f3ac6b8d9b1dc3388b9db97f422..dc9c54afb562cdb5d0cf2a024d59ad8dfa267e87 100644
+--- a/.medusa/server/src/api/store/product-reviews/middlewares.js
++++ b/.medusa/server/src/api/store/product-reviews/middlewares.js
+@@ -3,12 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.storeProductReviewRoutesMiddlewares = exports.defaultStoreReviewsQueryConfig = exports.allowedStoreProductReviewFields = exports.defaultStoreProductReviewFields = exports.upsertProductReviewsSchema = exports.listStoreProductReviewsQuerySchema = void 0;
+ const framework_1 = require("@medusajs/framework");
+ const validators_1 = require("@medusajs/medusa/api/utils/validators");
+-const zod_1 = require("zod");
++const zod_1 = require("@medusajs/framework/zod");
+ const reviewStatuses = zod_1.z.enum(['pending', 'approved', 'flagged']);
+ exports.listStoreProductReviewsQuerySchema = (0, validators_1.createFindParams)({
+     offset: 0,
+     limit: 50,
+-}).merge(zod_1.z.object({
++}).extend({
+     id: zod_1.z.union([zod_1.z.string(), zod_1.z.array(zod_1.z.string())]).optional(),
+     status: zod_1.z.union([reviewStatuses, zod_1.z.array(reviewStatuses)]).default('approved').optional(),
+     product_id: zod_1.z.union([zod_1.z.string(), zod_1.z.array(zod_1.z.string())]).optional(),
+@@ -16,7 +16,7 @@ exports.listStoreProductReviewsQuerySchema = (0, validators_1.createFindParams)(
+     rating: zod_1.z.union([zod_1.z.number().max(5).min(1), zod_1.z.array(zod_1.z.number().max(5).min(1))]).optional(),
+     created_at: (0, validators_1.createOperatorMap)().optional(),
+     updated_at: (0, validators_1.createOperatorMap)().optional(),
+-}));
++});
+ exports.upsertProductReviewsSchema = zod_1.z.object({
+     reviews: zod_1.z.array(zod_1.z.object({
+         order_id: zod_1.z.string(),
